@@ -64,11 +64,16 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 	result_df.sort_values(by=['id'], inplace=True, ascending=True)
 
 	# Save result to csv, json, and/or db file
-	if results is None:
+	if results is None or ["db", "csv", "json"] not in results:
 		results = ["db"]
 	for result in results:
 		result = result.lower()
 		match result:
+			case "db":
+				db_file = 'results.db'
+				connection = sqlite3.connect(db_file)
+				result_df.to_sql(name='Games', con=connection, if_exists='replace', index=False)
+				print(f"{result}Results saved to {db_file}{term.normal}")
 			case "csv":
 				csv_file = 'results.csv'
 				result_df.to_csv(csv_file, index=False)
@@ -77,33 +82,6 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 				json_file = 'results.json'
 				result_df.to_json(json_file, orient='records', indent=4)
 				print(f"{result}Results saved to {json_file}{term.normal}")
-			case "db":
-				db_file = 'results.db'
-				connection = sqlite3.connect(db_file)
-				result_df.to_sql(name='Games', con=connection, if_exists='replace', index=False)
-				print(f"{result}Results saved to {db_file}{term.normal}")
-
-	# CSV
-	# #"""
-	# csv_file = 'results.csv'
-	# result_df.to_csv(csv_file, index=False)
-	# print(f"{result}Results saved to {csv_file}{term.normal}")
-	# #"""
-
-	# # JSON
-	# #"""
-	# json_file = 'results.json'
-	# result_df.to_json(json_file, orient='records', indent=4)
-	# print(f"{result}Results saved to {json_file}{term.normal}")
-	# #"""
-	
-	# # SQLite
-	# #"""
-	# db_file = 'results.db'
-	# connection = sqlite3.connect(db_file)
-	# result_df.to_sql(name='Games', con=connection, if_exists='replace', index=False)
-	# print(f"{result}Results saved to {db_file}{term.normal}")
-	# #"""
 
 
 if __name__ == '__main__':
