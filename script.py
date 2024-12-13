@@ -14,7 +14,7 @@ from helpers import queryDb
 def main(client_id, client_secret, min_id, max_id, db_path, results):
 
 	term = Terminal()
-	result = term.royalblue # results will be printed in blue
+	result_color = term.royalblue # results will be printed in blue
 
 	print(term.normal)
 
@@ -45,9 +45,10 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 		game_info = service.fetch_game_details(game_dict['Title'], game_dict['Id'])
 		# Add game if its id doesn't exist in the DataFrame already, else update it.
 		if game_info[0] not in result_df.values:
-			result_df.iloc[len(result_df.index)] = game_info
+			result_df.loc[len(result_df.index)] = game_info
 		else:
-			result_df.iloc[result_df['id'].searchsorted(game_info[0])] = game_info
+			if game_info[0] != 'N/A':
+				result_df.loc[result_df['id'].searchsorted(int(game_info[0]))] = game_info
 
 	# Get games by id
 	if min_id is not None and max_id is not None:
@@ -56,15 +57,16 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 			game_info = service.fetch_game_details("", id)
 			# Add game if its id doesn't exist in the DataFrame already, else update it.
 			if game_info[0] not in result_df.values:
-				result_df.iloc[len(result_df.index)] = game_info
+				result_df.loc[len(result_df.index)] = game_info
 			else:
-				result_df.iloc[result_df['id'].searchsorted(game_info[0])] = game_info
+				if game_info[0] != 'N/A':
+					result_df.loc[result_df['id'].searchsorted(int(game_info[0]))] = game_info
 
 	# Sort by id
 	result_df.sort_values(by=['id'], inplace=True, ascending=True)
 
 	# Save result to csv, json, and/or db file
-	if results is None or ["db", "csv", "json"] not in results:
+	if results is None or any(["db", "csv", "json"]) in results:
 		results = ["db"]
 	for result in results:
 		result = result.lower()
@@ -73,15 +75,15 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 				db_file = 'results.db'
 				connection = sqlite3.connect(db_file)
 				result_df.to_sql(name='Games', con=connection, if_exists='replace', index=False)
-				print(f"{result}Results saved to {db_file}{term.normal}")
+				print(f"{result_color}Results saved to {db_file}{term.normal}")
 			case "csv":
 				csv_file = 'results.csv'
 				result_df.to_csv(csv_file, index=False)
-				print(f"{result}Results saved to {csv_file}{term.normal}")
+				print(f"{result_color}Results saved to {csv_file}{term.normal}")
 			case "json":
 				json_file = 'results.json'
 				result_df.to_json(json_file, orient='records', indent=4)
-				print(f"{result}Results saved to {json_file}{term.normal}")
+				print(f"{result_color}Results saved to {json_file}{term.normal}")
 
 
 if __name__ == '__main__':
@@ -94,15 +96,16 @@ if __name__ == '__main__':
 	parser.add_argument("--min_id", required=False, type=int)
 	parser.add_argument("--max_id", required=False, type=int)
 	parser.add_argument("--db_path", required=False, type=str)
-	parser.add_argument("--results", required=False, type=list[str])
+	parser.add_argument("--results", required=False, type=str)
 	args = parser.parse_args()
+	results_list = args.results.split(",")
 
 	client_id = args.client_id
 	client_secret = args.client_secret
 	db_path = args.db_path
 	min_id = args.min_id
 	max_id = args.max_id
-	results = args.results
+	results = results_list
 
 	# Run main()
 	main(client_id, client_secret, min_id, max_id, db_path, results)

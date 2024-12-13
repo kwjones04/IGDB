@@ -1,3 +1,7 @@
+"""
+Helper functions
+"""
+
 import sqlite3
 from blessed import Terminal
 
