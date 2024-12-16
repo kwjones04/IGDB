@@ -1,5 +1,5 @@
 # IGDB Client Folder
-
+Made by Kyria Jones
 ## Get data using CSV file
 - Add titles of games you want to add in the CSV file "Games-To-Add.csv"
 - If you are not getting the information you expect using the title, you can add the game's IGDB id next to the title, separated by a comma.
