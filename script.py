@@ -47,7 +47,7 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 		if game_info[0] not in result_df.values:
 			result_df.loc[len(result_df.index)] = game_info
 		else:
-			if game_info[0] != 'N/A':
+			if game_info[0] != 'N/A' and game_info[0] in result_df.values:
 				result_df.loc[result_df['id'].searchsorted(int(game_info[0]))] = game_info
 
 	# Get games by id
@@ -59,7 +59,7 @@ def main(client_id, client_secret, min_id, max_id, db_path, results):
 			if game_info[0] not in result_df.values:
 				result_df.loc[len(result_df.index)] = game_info
 			else:
-				if game_info[0] != 'N/A':
+				if game_info[0] != 'N/A' and game_info[0] in result_df.values:
 					result_df.loc[result_df['id'].searchsorted(int(game_info[0]))] = game_info
 
 	# Sort by id
